@@ -1,0 +1,4 @@
+moviepy
+music_tag
+numpy
+pandas
