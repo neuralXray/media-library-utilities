@@ -1,8 +1,11 @@
 # Music database
 
-# esta función es la misma que load_pc_playlist() en sync-music-playlists/sync_music_playlists.py
-def read_favorites_playlist(favorites_playlist_root_directory, playlist, start_playlist, end_playlist,
-                            music_root_directory, start_favorite_songs, end_favorite_songs):
+# esta función es la misma que load_pc_playlist()
+# en sync-music-playlists/sync_music_playlists.py
+def read_favorites_playlist(favorites_playlist_root_directory, playlist,
+                            start_playlist, end_playlist,
+                            music_root_directory,
+                            start_favorite_songs, end_favorite_songs):
     from urllib.parse import unquote
 
     file = open(favorites_playlist_root_directory + playlist)
@@ -27,15 +30,18 @@ def read_favorites_playlist(favorites_playlist_root_directory, playlist, start_p
     end = end_favorite_songs
 
     for i, l in enumerate(favorites_playlist):
-        favorites_playlist[i] = unquote(l[l.find(start) + len(start) + 2:l.find(end)]).replace('&amp;', '&')
+        favorites_playlist[i] = \
+        unquote(l[l.find(start) + len(start) + 2:l.find(end)]).replace('&amp;', '&')
 
     favorites_playlist.sort()
 
     return favorites_playlist
 
 
-def read_music_library(root_directories, music_root_directory, favorites_playlist_root_directory, playlist,
-                       start_playlist, end_playlist, start_favorite_songs, end_favorite_songs):
+def read_music_library(root_directories, music_root_directory,
+                       favorites_playlist_root_directory, playlist,
+                       start_playlist, end_playlist,
+                       start_favorite_songs, end_favorite_songs):
     from os import walk
     from os.path import isdir
     from music_tag import load_file
@@ -43,15 +49,18 @@ def read_music_library(root_directories, music_root_directory, favorites_playlis
     from numpy import array, unique, argsort
 
     # Load favorite songs relative location (directory)
-    favorites = read_favorites_playlist(favorites_playlist_root_directory, playlist, start_playlist, end_playlist,
-                                        music_root_directory, start_favorite_songs, end_favorite_songs)
+    favorites = read_favorites_playlist(favorites_playlist_root_directory, playlist,
+                                        start_playlist, end_playlist,
+                                        music_root_directory,
+                                        start_favorite_songs, end_favorite_songs)
 
     if isdir(root_directories[0] + music_root_directory):
         music_root_directory = root_directories[0] + music_root_directory
     else:
         music_root_directory = root_directories[1] + music_root_directory
 
-    # Load relative location (directory), artist, year, album, track number, title and genre from all music files in mrd
+    # Load relative location (directory),
+    #      artist, year, album, track number, title and genre from all music files in mrd
     d = []
     for root, dirs, files in walk(top=music_root_directory):
         if not files:
@@ -66,13 +75,14 @@ def read_music_library(root_directories, music_root_directory, favorites_playlis
 
     d.sort()
 
-    data = DataFrame(data=d, columns=['Location', 'Artist', 'Year', 'Album', 'Track number', 'Title', 'Genre'])
+    data = DataFrame(data=d, columns=['Location', 'Artist', 'Year', 'Album',
+                                      'Track number', 'Title', 'Genre'])
     data = data.set_index('Location')
     data['Favorite'] = False
     data.loc[favorites, 'Favorite'] = True
 
-    print('################################################################################')
-    print('##### SUMMARY ##################################################################')
+    print('######################################################################')
+    print('##### SUMMARY ########################################################')
     print('- Total number of songs:', len(data))
     print('- Total number of favorite songs:', sum(data['Favorite']))
     print()
@@ -83,7 +93,7 @@ def read_music_library(root_directories, music_root_directory, favorites_playlis
     print('- Number of favourite songs of featured artists:')
     for n, artist in zip(featured_artists[1][i], featured_artists[0][i]):
         print(str(n) + ': ' + artist)
-    print('################################################################################')
+    print('######################################################################')
     print('\n')
 
     return data
@@ -100,25 +110,28 @@ def read_music_database(database_root_directory):
 
 def update_music_database(database_root_directory, root_directories, music_root_directory,
                           favorites_playlist_root_directory, playlist,
-                          start_playlist, end_playlist, start_favorite_songs, end_favorite_songs):
-    data = read_music_library(root_directories, music_root_directory, favorites_playlist_root_directory, playlist,
-                              start_playlist, end_playlist, start_favorite_songs, end_favorite_songs)
+                          start_playlist, end_playlist,
+                          start_favorite_songs, end_favorite_songs):
+    data = read_music_library(root_directories, music_root_directory,
+                              favorites_playlist_root_directory, playlist,
+                              start_playlist, end_playlist,
+                              start_favorite_songs, end_favorite_songs)
     data_old = read_music_database(database_root_directory)
 
     data_deleted = data_old.loc[~ data_old.index.isin(data.index)]
-    print('################################################################################')
-    print('##### DELETED ##################################################################')
+    print('######################################################################')
+    print('##### DELETED ########################################################')
     if len(data_deleted) == 0:
         print('Nothing was deleted')
     else:
         for d in data_deleted.index:
             print(d)
-    print('################################################################################')
+    print('######################################################################')
     print('\n')
 
     data_new = data.loc[~ data.index.isin(data_old.index)]
-    print('################################################################################')
-    print('##### NEWLY ADDED ##############################################################')
+    print('######################################################################')
+    print('##### NEWLY ADDED ####################################################')
     if len(data_new) == 0:
         print('Nothing was added')
     else:
@@ -128,6 +141,7 @@ def update_music_database(database_root_directory, root_directories, music_root_
         print()
         print('-', len(data_new['Album'].unique()), 'albums')
         print('-', len(data_new), 'songs')
-    print('################################################################################')
+    print('######################################################################')
 
     data.to_csv(database_root_directory + 'music.csv')
+

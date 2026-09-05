@@ -42,16 +42,17 @@ def read_film_library(video_root_directory, film_root_directory):
 
     d.sort()
 
-    data = DataFrame(data=d, columns=['Location', 'Title', 'Year', 'Director', 'Category'])
+    data = DataFrame(data=d,
+                     columns=['Location', 'Title', 'Year', 'Director', 'Category'])
     data = data.set_index('Location')
 
     print('\n')
-    print('################################################################################')
-    print('##### SUMMARY ##################################################################')
+    print('######################################################################')
+    print('##### SUMMARY ########################################################')
     print('Total number of:')
     print('- Films:', len(data[data['Category'] == 'Films']))
     print('- Music videos:', len(data[data['Category'] == 'Music']))
-    print('################################################################################')
+    print('######################################################################')
     print('\n')
 
     return data
@@ -66,24 +67,25 @@ def read_film_database(database_root_directory):
     return data
 
 
-def update_film_database(database_root_directory, video_root_directory, film_root_directory):
+def update_film_database(database_root_directory, video_root_directory,
+                         film_root_directory):
     data = read_film_library(video_root_directory, film_root_directory)
     data_old = read_film_database(database_root_directory)
 
     data_deleted = data_old.loc[~ data_old.index.isin(data.index)]
-    print('################################################################################')
-    print('##### DELETED ##################################################################')
+    print('######################################################################')
+    print('##### DELETED ########################################################')
     if len(data_deleted) == 0:
         print('Nothing was deleted')
     else:
         for d in data_deleted.index:
             print(d)
-    print('################################################################################')
+    print('######################################################################')
     print('\n')
 
     data_new = data.loc[~ data.index.isin(data_old.index)]
-    print('################################################################################')
-    print('##### NEWLY ADDED ##############################################################')
+    print('######################################################################')
+    print('##### NEWLY ADDED ####################################################')
     if len(data_new) == 0:
         print('Nothing was added')
     else:
@@ -92,9 +94,10 @@ def update_film_database(database_root_directory, video_root_directory, film_roo
         if sum(data_new['Category'] == 'Music') > 0:
             print('  Music videos: ', len(data_new[data_new['Category'] == 'Music']))
         for i in range(len(data_new)):
-            print(str(i + 1) + ': ' + data_new.iloc[i]['Title'] + ' (' + data_new.iloc[i]['Year'] + '), by',
+            print(str(i + 1) + ': ' + data_new.iloc[i]['Title'],
+                  '(' + data_new.iloc[i]['Year'] + '), by',
                   data_new.iloc[i]['Director'])
-    print('################################################################################')
+    print('######################################################################')
 
     data.to_csv(database_root_directory + 'films.csv')
 

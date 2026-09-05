@@ -44,11 +44,12 @@ def read_series_library(video_root_directories, series_root_directory):
             #print()
     #print()
 
-    data = DataFrame(data=d, columns=['Location', 'Category', 'Series', 'Season', 'Number of Chapters'])
+    data = DataFrame(data=d, columns=['Location', 'Category', 'Series', 'Season',
+                                      'Number of Chapters'])
     data = data.set_index('Location')
 
-    print('################################################################################')
-    print('##### SUMMARY ##################################################################')
+    print('######################################################################')
+    print('##### SUMMARY ########################################################')
     print('Total number of:\n')
 
     print('- Series:', len(data.loc[data['Category'] == 'Series', 'Series'].unique()))
@@ -56,18 +57,22 @@ def read_series_library(video_root_directories, series_root_directory):
     print('chapters:', sum(data.loc[data['Category'] == 'Series', 'Number of Chapters']))
     print()
 
-    print('- Animated Sitcoms:', len(data.loc[data['Category'] == 'Animated Sitcoms', 'Series'].unique()))
+    print('- Animated Sitcoms:',
+          len(data.loc[data['Category'] == 'Animated Sitcoms', 'Series'].unique()))
     print('seasons:', len(data.loc[data['Category'] == 'Animated Sitcoms']))
-    print('chapters:', sum(data.loc[data['Category'] == 'Animated Sitcoms', 'Number of Chapters']))
+    print('chapters:',
+          sum(data.loc[data['Category'] == 'Animated Sitcoms', 'Number of Chapters']))
     print()
 
     print('- Anime:', len(data.loc[data['Category'] == 'Anime', 'Series'].unique()))
     print('chapters:', sum(data.loc[data['Category'] == 'Anime', 'Number of Chapters']))
     print()
 
-    print('- Documentary series:', len(data.loc[data['Category'] == 'Documentaries', 'Series'].unique()))
-    print('documentaries:', sum(data.loc[data['Category'] == 'Documentaries', 'Number of Chapters']))
-    print('################################################################################')
+    print('- Documentary series:',
+          len(data.loc[data['Category'] == 'Documentaries', 'Series'].unique()))
+    print('documentaries:',
+          sum(data.loc[data['Category'] == 'Documentaries', 'Number of Chapters']))
+    print('######################################################################')
     print('\n')
 
     return data
@@ -82,46 +87,52 @@ def read_series_database(database_root_directory):
     return data
 
 
-def update_series_database(database_root_directory, video_root_directories, series_root_directory):
+def update_series_database(database_root_directory, video_root_directories,
+                           series_root_directory):
     data = read_series_library(video_root_directories, series_root_directory)
     data_old = read_series_database(database_root_directory)
 
     data_deleted = data_old.loc[~ data_old.index.isin(data.index)]
-    print('################################################################################')
-    print('##### DELETED ##################################################################')
+    print('######################################################################')
+    print('##### DELETED ########################################################')
     if len(data_deleted) == 0:
         print('Nothing was deleted')
     else:
         for d in data_deleted.index:
             print(d)
-    print('################################################################################')
+    print('######################################################################')
     print('\n')
 
     data_new = data.loc[~ data.index.isin(data_old.index)]
-    print('################################################################################')
-    print('##### NEWLY ADDED ##############################################################')
+    print('######################################################################')
+    print('##### NEWLY ADDED ####################################################')
     if len(data_new) == 0:
         print('Nothing was added')
     else:
         if sum(data_new['Category'] == 'Series') != 0:
             print('Series:')
-            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Series', 'Series'].unique()):
+            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Series',
+                                               'Series'].unique()):
                 print(i + 1, n)
             print()
         if sum(data_new['Category'] == 'Animated Sitcoms') != 0:
             print('Animated Sitcoms:')
-            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Animated Sitcoms', 'Series'].unique()):
+            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Animated Sitcoms',
+                                               'Series'].unique()):
                 print(i + 1, n)
             print()
         if sum(data_new['Category'] == 'Anime') != 0:
             print('Anime:')
-            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Anime', 'Series'].unique()):
+            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Anime',
+                                               'Series'].unique()):
                 print(i + 1, n)
             print()
         if sum(data_new['Category'] == 'Documentaries') != 0:
             print('Documentaries:')
-            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Documentaries', 'Series'].unique()):
+            for i, n in enumerate(data_new.loc[data_new['Category'] == 'Documentaries',
+                                               'Series'].unique()):
                 print(i + 1, n)
-    print('################################################################################')
+    print('######################################################################')
 
     data.to_csv(database_root_directory + 'series.csv')
+
