@@ -44,7 +44,7 @@ def read_music_library(root_directories, music_root_directory,
                        start_favorite_songs, end_favorite_songs,
                        log_file):
     from utils import logging
-    from os import walk
+    from os import walk, remove
     from os.path import isdir
     from music_tag import load_file
     from pandas import DataFrame
@@ -72,8 +72,12 @@ def read_music_library(root_directories, music_root_directory,
             if f[f.rindex('.') + 1:] not in ['png', 'jpg', 'jpeg', 'webp', 'lrc', 'txt']:
                 md = root[len(music_root_directory):] + '/' + f
                 m = load_file(music_root_directory + md)
-                d.append((md, m['artist'].value, m['year'].value, m['album'].value,
-                          m['tracknumber'].value, m['title'].value, m['genre'].value))
+                try:
+                    d.append((md, m['artist'].value, m['year'].value, m['album'].value,
+                              m['tracknumber'].value, m['title'].value, m['genre'].value))
+                except Exception as e:
+                    remove(log_file)
+                    raise RuntimeError(f'Error extracting metadata from: {md}') from e
 
     d.sort()
 
