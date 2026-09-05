@@ -41,7 +41,9 @@ def read_favorites_playlist(favorites_playlist_root_directory, playlist,
 def read_music_library(root_directories, music_root_directory,
                        favorites_playlist_root_directory, playlist,
                        start_playlist, end_playlist,
-                       start_favorite_songs, end_favorite_songs):
+                       start_favorite_songs, end_favorite_songs,
+                       log_file):
+    from utils import logging
     from os import walk
     from os.path import isdir
     from music_tag import load_file
@@ -81,20 +83,29 @@ def read_music_library(root_directories, music_root_directory,
     data['Favorite'] = False
     data.loc[favorites, 'Favorite'] = True
 
-    print('######################################################################')
-    print('##### SUMMARY ########################################################')
-    print('- Total number of songs:', len(data))
-    print('- Total number of favorite songs:', sum(data['Favorite']))
-    print()
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### SUMMARY ########################################################'
+    logging(log, log_file)
+    log = f'- Total number of songs: {len(data)}'
+    logging(log, log_file)
+    log = f'- Total number of favorite songs: {sum(data["Favorite"])}'
+    logging(log, log_file)
+    log = ''
+    logging(log, log_file)
 
     artists = unique(array(data.loc[data['Favorite'], 'Artist']), return_counts=True)
     featured_artists = [artists[0][artists[1] > 10], artists[1][artists[1] > 10]]
     i = argsort(featured_artists[1])[::-1]
-    print('- Number of favourite songs of featured artists:')
+    log = '- Number of favourite songs of featured artists:'
+    logging(log, log_file)
     for n, artist in zip(featured_artists[1][i], featured_artists[0][i]):
-        print(str(n) + ': ' + artist)
-    print('######################################################################')
-    print('\n')
+        log = str(n) + ': ' + artist
+        logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '\n'
+    logging(log, log_file)
 
     return data
 
@@ -111,37 +122,55 @@ def read_music_database(database_root_directory):
 def update_music_database(database_root_directory, root_directories, music_root_directory,
                           favorites_playlist_root_directory, playlist,
                           start_playlist, end_playlist,
-                          start_favorite_songs, end_favorite_songs):
+                          start_favorite_songs, end_favorite_songs,
+                          log_file):
+    from utils import logging
     data = read_music_library(root_directories, music_root_directory,
                               favorites_playlist_root_directory, playlist,
                               start_playlist, end_playlist,
-                              start_favorite_songs, end_favorite_songs)
+                              start_favorite_songs, end_favorite_songs,
+                              log_file)
     data_old = read_music_database(database_root_directory)
 
     data_deleted = data_old.loc[~ data_old.index.isin(data.index)]
-    print('######################################################################')
-    print('##### DELETED ########################################################')
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### DELETED ########################################################'
+    logging(log, log_file)
     if len(data_deleted) == 0:
-        print('Nothing was deleted')
+        log = 'Nothing was deleted'
+        logging(log, log_file)
     else:
         for d in data_deleted.index:
-            print(d)
-    print('######################################################################')
-    print('\n')
+            log = d
+            logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '\n'
+    logging(log, log_file)
 
     data_new = data.loc[~ data.index.isin(data_old.index)]
-    print('######################################################################')
-    print('##### NEWLY ADDED ####################################################')
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### NEWLY ADDED ####################################################'
+    logging(log, log_file)
     if len(data_new) == 0:
-        print('Nothing was added')
+        log = 'Nothing was added'
+        logging(log, log_file)
     else:
-        print('- Artists:')
+        log = '- Artists:'
+        logging(log, log_file)
         for i, artist in enumerate(data_new['Artist'].unique()):
-            print(str(i + 1) + ': ' + artist)
-        print()
-        print('-', len(data_new['Album'].unique()), 'albums')
-        print('-', len(data_new), 'songs')
-    print('######################################################################')
+            log = str(i + 1) + ': ' + artist
+            logging(log, log_file)
+        log = ''
+        logging(log, log_file)
+        log = f'- {len(data_new["Album"].unique())} albums'
+        logging(log, log_file)
+        log = f'- {len(data_new)}, songs'
+        logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
 
     data.to_csv(database_root_directory + 'music.csv')
 

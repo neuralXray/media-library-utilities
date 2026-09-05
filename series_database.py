@@ -1,6 +1,8 @@
 # Series, Animated Sitcoms, Anime and Documentaries database
 
-def read_series_library(video_root_directories, series_root_directory):
+def read_series_library(video_root_directories, series_root_directory,
+                        log_file):
+    from utils import logging
     from os import listdir
     from os.path import isfile
     from pandas import DataFrame
@@ -8,20 +10,24 @@ def read_series_library(video_root_directories, series_root_directory):
     video_root_directories = [video_root_directory + series_root_directory
                               for video_root_directory in video_root_directories]
 
-    #print('Total number of chapters (from each season of each series):')
-    #print()
+    #log = 'Total number of chapters (from each season of each series):'
+    #logging(log, log_file)
+    #log = ''
+    #logging(log, log_file)
     d = []
     for video_root_directory in video_root_directories:
         categories = listdir(video_root_directory)
         categories.sort()
 
         for category in categories:
-            #print('-', category + '\n')
+            #log = '- ' + category + '\n'
+            #logging(log, log_file)
             series = listdir(video_root_directory + category)
             series.sort()
 
             for i, series in enumerate(series):
-                #print('  ' + str(i + 1) + ': ' + series)
+                #log = '  ' + str(i + 1) + ': ' + series
+                #logging(log, log_file)
                 seasons = listdir(video_root_directory + category + '/' + series)
                 seasons.sort()
 
@@ -34,46 +40,69 @@ def read_series_library(video_root_directories, series_root_directory):
                         location = category + '/' + series + '/' + season
                         season = season[len(series) + 1:]
                         n = len(listdir(video_root_directory + location))
-                        #print(season + ': ' + str(n))
+                        #log = season + ': ' + str(n)
+                        #logging(log, log_file)
                         d.append([location, category, series, season, n])
                 if m != 0:
-                    #print('1: ' + str(m))
+                    #log = '1: ' + str(m)
+                    #logging(log, log_file)
                     d.append([location, category, series, '1', m])
 
-                #print()
-            #print()
-    #print()
+                #log = ''
+                #logging(log, log_file)
+            #log = ''
+            #logging(log, log_file)
+    #log = ''
+    #logging(log, log_file)
 
     data = DataFrame(data=d, columns=['Location', 'Category', 'Series', 'Season',
                                       'Number of Chapters'])
     data = data.set_index('Location')
 
-    print('######################################################################')
-    print('##### SUMMARY ########################################################')
-    print('Total number of:\n')
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### SUMMARY ########################################################'
+    logging(log, log_file)
+    log = 'Total number of:\n'
+    logging(log, log_file)
 
-    print('- Series:', len(data.loc[data['Category'] == 'Series', 'Series'].unique()))
-    print('seasons:', len(data.loc[data['Category'] == 'Series']))
-    print('chapters:', sum(data.loc[data['Category'] == 'Series', 'Number of Chapters']))
-    print()
+    log = f'- Series: {len(data.loc[data["Category"] == "Series", "Series"].unique())}'
+    logging(log, log_file)
+    log = f'seasons: {len(data.loc[data["Category"] == "Series"])}'
+    logging(log, log_file)
+    log = f'chapters: {sum(data.loc[data["Category"] == "Series", "Number of Chapters"])}'
+    logging(log, log_file)
+    log = ''
+    logging(log, log_file)
 
-    print('- Animated Sitcoms:',
-          len(data.loc[data['Category'] == 'Animated Sitcoms', 'Series'].unique()))
-    print('seasons:', len(data.loc[data['Category'] == 'Animated Sitcoms']))
-    print('chapters:',
-          sum(data.loc[data['Category'] == 'Animated Sitcoms', 'Number of Chapters']))
-    print()
+    log = '- Animated Sitcoms: ' + \
+          str(len(data.loc[data['Category'] == 'Animated Sitcoms', 'Series'].unique()))
+    logging(log, log_file)
+    log = f'seasons: {len(data.loc[data["Category"] == "Animated Sitcoms"])}'
+    logging(log, log_file)
+    log = 'chapters: ' + \
+          str(sum(data.loc[data['Category'] == 'Animated Sitcoms', 'Number of Chapters']))
+    logging(log, log_file)
+    log = ''
+    logging(log, log_file)
 
-    print('- Anime:', len(data.loc[data['Category'] == 'Anime', 'Series'].unique()))
-    print('chapters:', sum(data.loc[data['Category'] == 'Anime', 'Number of Chapters']))
-    print()
+    log = f'- Anime: {len(data.loc[data["Category"] == "Anime", "Series"].unique())}'
+    logging(log, log_file)
+    log = f'chapters: {sum(data.loc[data["Category"] == "Anime", "Number of Chapters"])}'
+    logging(log, log_file)
+    log = ''
+    logging(log, log_file)
 
-    print('- Documentary series:',
-          len(data.loc[data['Category'] == 'Documentaries', 'Series'].unique()))
-    print('documentaries:',
-          sum(data.loc[data['Category'] == 'Documentaries', 'Number of Chapters']))
-    print('######################################################################')
-    print('\n')
+    log = '- Documentary series: ' + \
+          str(len(data.loc[data['Category'] == 'Documentaries', 'Series'].unique()))
+    logging(log, log_file)
+    log = 'documentaries: ' + \
+          str(sum(data.loc[data['Category'] == 'Documentaries', 'Number of Chapters']))
+    logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '\n'
+    logging(log, log_file)
 
     return data
 
@@ -88,51 +117,75 @@ def read_series_database(database_root_directory):
 
 
 def update_series_database(database_root_directory, video_root_directories,
-                           series_root_directory):
-    data = read_series_library(video_root_directories, series_root_directory)
+                           series_root_directory,
+                           log_file):
+    from utils import logging
+    data = read_series_library(video_root_directories, series_root_directory,
+                               log_file)
     data_old = read_series_database(database_root_directory)
 
     data_deleted = data_old.loc[~ data_old.index.isin(data.index)]
-    print('######################################################################')
-    print('##### DELETED ########################################################')
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### DELETED ########################################################'
+    logging(log, log_file)
     if len(data_deleted) == 0:
-        print('Nothing was deleted')
+        log = 'Nothing was deleted'
+        logging(log, log_file)
     else:
         for d in data_deleted.index:
-            print(d)
-    print('######################################################################')
-    print('\n')
+            log = d
+            logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '\n'
+    logging(log, log_file)
 
     data_new = data.loc[~ data.index.isin(data_old.index)]
-    print('######################################################################')
-    print('##### NEWLY ADDED ####################################################')
+    log = '######################################################################'
+    logging(log, log_file)
+    log = '##### NEWLY ADDED ####################################################'
+    logging(log, log_file)
     if len(data_new) == 0:
-        print('Nothing was added')
+        log = 'Nothing was added'
+        logging(log, log_file)
     else:
         if sum(data_new['Category'] == 'Series') != 0:
-            print('Series:')
+            log = 'Series:'
+            logging(log, log_file)
             for i, n in enumerate(data_new.loc[data_new['Category'] == 'Series',
                                                'Series'].unique()):
-                print(i + 1, n)
-            print()
+                log = f'{i + 1} {n}'
+                logging(log, log_file)
+            log = ''
+            logging(log, log_file)
         if sum(data_new['Category'] == 'Animated Sitcoms') != 0:
-            print('Animated Sitcoms:')
+            log = 'Animated Sitcoms:'
+            logging(log, log_file)
             for i, n in enumerate(data_new.loc[data_new['Category'] == 'Animated Sitcoms',
                                                'Series'].unique()):
-                print(i + 1, n)
-            print()
+                log = f'{i + 1} {n}'
+                logging(log, log_file)
+            log = ''
+            logging(log, log_file)
         if sum(data_new['Category'] == 'Anime') != 0:
-            print('Anime:')
+            log = 'Anime:'
+            logging(log, log_file)
             for i, n in enumerate(data_new.loc[data_new['Category'] == 'Anime',
                                                'Series'].unique()):
-                print(i + 1, n)
-            print()
+                log = f'{i + 1} {n}'
+                logging(log, log_file)
+            log = ''
+            logging(log, log_file)
         if sum(data_new['Category'] == 'Documentaries') != 0:
-            print('Documentaries:')
+            log = 'Documentaries:'
+            logging(log, log_file)
             for i, n in enumerate(data_new.loc[data_new['Category'] == 'Documentaries',
                                                'Series'].unique()):
-                print(i + 1, n)
-    print('######################################################################')
+                log = f'{i + 1} {n}'
+                logging(log, log_file)
+    log = '######################################################################'
+    logging(log, log_file)
 
     data.to_csv(database_root_directory + 'series.csv')
 
